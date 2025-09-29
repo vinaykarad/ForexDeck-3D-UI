@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Forex 3D Dashboard — Demo</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #08090b;
+        --card: #0f1720;
+        --glass: rgba(255, 255, 255, 0.04);
+        --accent-1: #3b82f6; /* blue */
+        --accent-2: #06b6d4; /* teal */
+        --accent-3: #a78bfa; /* purple */
+        --muted: rgba(255, 255, 255, 0.6);
+        --glass-border: rgba(255, 255, 255, 0.06);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto,
+          "Helvetica Neue", Arial;
+      }
+      body {
+        background: linear-gradient(180deg, var(--bg), #020203);
+        color: #fff;
+        overflow-y: auto;
+      }
+
+      /* Layout */
+      .wrap {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 24px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        color: #fff;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      /* Grid */
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 22px;
+        margin-top: 28px;
+      }
+      @media (max-width: 980px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .right-col {
+          order: -1;
+        }
+      }
+
+      /* 3D Stage */
+      .stage {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.02),
+          transparent
+        );
+        border-radius: 16px;
+        padding: 22px;
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(6px);
+        min-height: 520px;
+        position: relative;
+        overflow: hidden;
+      }
+      .stage-inner {
+        perspective: 1200px;
+        height: 100%;
+      }
+
+      /* Floating 3D cards */
+      .cards {
+        display: flex;
+        gap: 18px;
+        align-items: flex-start;
+      }
+      .card {
+        width: 220px;
+        height: 120px;
+        border-radius: 14px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        border: 1px solid var(--glass-border);
+        padding: 14px;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 300ms cubic-bezier(0.2, 0.9, 0.3, 1),
+          box-shadow 300ms;
+        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+      }
+      .card:hover {
+        transform: translateZ(28px) rotateX(6deg) rotateY(-6deg);
+        box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6);
+      }
+      .card .pair {
+        font-weight: 600;
+      }
+      .card .price {
+        margin-top: 6px;
+        font-size: 18px;
+      }
+      .card .change {
+        font-size: 13px;
+        margin-top: 8px;
+      }
+      .up {
+        color: #34d399;
+      }
+      .down {
+        color: #fb7185;
+      }
+
+      /* 3D rotating cube (currencies) */
+      .cube-wrap {
+        width: 320px;
+        height: 320px;
+        margin: 22px auto;
+        display: grid;
+        place-items: center;
+      }
+      .cube {
+        width: 180px;
+        height: 180px;
+        position: relative;
+        transform-style: preserve-3d;
+        transform: rotateX(-20deg) rotateY(20deg);
+        animation: spin 12s linear infinite;
+      }
+      .cube:hover {
+        animation-play-state: paused;
+      }
+      .cube-face {
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: 28px;
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(6px);
+      }
+      .f1 {
+        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+        transform: translateZ(90px);
+      }
+      .f2 {
+        background: linear-gradient(135deg, var(--accent-3), #7c3aed);
+        transform: rotateY(180deg) translateZ(90px);
+      }
+      .f3 {
+        background: linear-gradient(135deg, #fb7185, #f97316);
+        transform: rotateY(90deg) translateZ(90px);
+      }
+      .f4 {
+        background: linear-gradient(135deg, #34d399, #10b981);
+        transform: rotateY(-90deg) translateZ(90px);
+      }
+      .f5 {
+        background: linear-gradient(135deg, #60a5fa, #2563eb);
+        transform: rotateX(90deg) translateZ(90px);
+      }
+      .f6 {
+        background: linear-gradient(135deg, #fbbf24, #f97316);
+        transform: rotateX(-90deg) translateZ(90px);
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotateX(-20deg) rotateY(0deg);
+        }
+        100% {
+          transform: rotateX(-20deg) rotateY(360deg);
+        }
+      }
+
+      /* 3D Chart (simple animated sparkline using SVG) */
+      .chart-box {
+        margin-top: 8px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.02),
+          transparent
+        );
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid var(--glass-border);
+      }
+      .spark path {
+        stroke: var(--accent-2);
+        stroke-width: 2;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        opacity: 0.95;
+      }
+
+      /* Right column controls */
+      .right-col {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .panel {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.02),
+          transparent
+        );
+        padding: 18px;
+        border-radius: 14px;
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(6px);
+      }
+
+      .btn-row {
+        display: flex;
+        gap: 10px;
+      }
+      .btn {
+        padding: 12px 18px;
+        border-radius: 12px;
+        border: 0;
+        font-weight: 600;
+        cursor: pointer;
+        outline: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 8px 18px rgba(2, 6, 23, 0.6);
+        transform-style: preserve-3d;
+        transition: transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1),
+          box-shadow 160ms, filter 160ms;
+        background: linear-gradient(90deg, var(--accent-1), var(--accent-3));
+        color: #fff;
+      }
+      .btn:active {
+        transform: translateZ(-6px) translateY(2px);
+        filter: brightness(0.95);
+        box-shadow: 0 4px 10px rgba(2, 6, 23, 0.6);
+      }
+      .btn.ghost {
+        background: transparent;
+        border: 1px solid var(--glass-border);
+        color: var(--muted);
+      }
+      .btn.buy {
+        background: linear-gradient(90deg, #10b981, #34d399);
+      }
+      .btn.sell {
+        background: linear-gradient(90deg, #ef4444, #fb7185);
+      }
+
+      /* 3D press illusion for buttons */
+      .btn::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        transform: translateZ(-12px);
+        box-shadow: 0 18px 40px rgba(2, 6, 23, 0.6);
+        opacity: 0.7;
+        transition: opacity 160ms;
+        pointer-events: none;
+      }
+
+      /* Footer small */
+      .meta {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+
+      /* Small utilities */
+      .flex {
+        display: flex;
+        align-items: center;
+      }
+      .space-y-8 > * + * {
+        margin-top: 8px;
+      }
+
+      /* subtle parallax lights */
+      .light1,
+      .light2 {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.18;
+      }
+      .light1 {
+        width: 420px;
+        height: 420px;
+        left: -120px;
+        top: -80px;
+        background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+      }
+      .light2 {
+        width: 360px;
+        height: 360px;
+        right: -120px;
+        bottom: -80px;
+        background: linear-gradient(135deg, var(--accent-2), #06b6d4);
+      }
+
+      /* Tiny responsive tweaks */
+      @media (max-width: 460px) {
+        .card {
+          width: 100%;
+          height: auto;
+        }
+        .cards {
+          flex-direction: column;
+        }
+        .cube-wrap {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="header">
+        <div class="brand">
+          <div class="logo">FX</div>
+          <div>
+            <h1>ForexDeck — 3D Trading UI</h1>
+            <div class="sub">Demo frontend — 3D visuals, quick actions</div>
+          </div>
+        </div>
+        <div class="flex">
+          <div class="sub" style="margin-right: 18px">
+            Demo Balance: <strong>$124,820.50</strong>
+          </div>
+          <button class="btn ghost" aria-label="Profile">Profile</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <!-- LEFT: Stage with 3D elements -->
+        <div class="stage">
+          <div class="light1"></div>
+          <div class="light2"></div>
+          <div class="stage-inner">
+            <div class="cards">
+              <div class="card">
+                <div class="pair">EUR/USD</div>
+                <div class="price">1.0864</div>
+                <div class="change up">+0.28% • +0.0030</div>
+                <div class="chart-box">
+                  <!-- subtle svg sparkline -->
+                  <svg
+                    viewBox="0 0 200 40"
+                    class="spark"
+                    width="100%"
+                    height="40"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M0,30 C30,20 55,10 80,20 C105,30 130,16 160,12 C180,10 200,8 200,8"
+                      stroke-linecap="round"
+                    >
+                      <animate
+                        attributeName="d"
+                        dur="5s"
+                        repeatCount="indefinite"
+                        values="M0,30 C30,20 55,10 80,20 C105,30 130,16 160,12 C180,10 200,8 200,8; M0,26 C30,18 55,6 80,14 C105,24 130,20 160,18 C180,16 200,12 200,12; M0,30 C30,20 55,10 80,20 C105,30 130,16 160,12 C180,10 200,8 200,8"
+                      />
+                    </path>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pair">GBP/USD</div>
+                <div class="price">1.2792</div>
+                <div class="change down">-0.14% • -0.0018</div>
+                <div class="chart-box">
+                  <svg
+                    viewBox="0 0 200 40"
+                    class="spark"
+                    width="100%"
+                    height="40"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M0,22 C30,28 55,26 80,24 C105,22 130,28 160,18 C180,10 200,12 200,12"
+                    >
+                      <animate
+                        attributeName="d"
+                        dur="4.6s"
+                        repeatCount="indefinite"
+                        values="M0,22 C30,28 55,26 80,24 C105,22 130,28 160,18 C180,10 200,12 200,12; M0,26 C30,18 55,30 80,22 C105,24 130,20 160,20 C180,16 200,10 200,10; M0,22 C30,28 55,26 80,24 C105,22 130,28 160,18 C180,10 200,12 200,12"
+                      />
+                    </path>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pair">USD/JPY</div>
+                <div class="price">152.12</div>
+                <div class="change up">+0.82% • +1.23</div>
+                <div class="chart-box">
+                  <svg
+                    viewBox="0 0 200 40"
+                    class="spark"
+                    width="100%"
+                    height="40"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M0,28 C40,18 70,12 95,24 C130,36 150,20 170,16 C190,12 200,9 200,9"
+                    >
+                      <animate
+                        attributeName="d"
+                        dur="6s"
+                        repeatCount="indefinite"
+                        values="M0,28 C40,18 70,12 95,24 C130,36 150,20 170,16 C190,12 200,9 200,9; M0,26 C40,28 70,22 95,18 C130,20 150,22 170,12 C190,10 200,8 200,8; M0,28 C40,18 70,12 95,24 C130,36 150,20 170,16 C190,12 200,9 200,9"
+                      />
+                    </path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- big 3D cube representing currencies -->
+            <div class="cube-wrap" aria-hidden="true">
+              <div class="cube" role="img" aria-label="Rotating currency cube">
+                <div class="cube-face f1">
+                  EUR<br /><small style="opacity: 0.9; font-weight: 600"
+                    >1.0864</small
+                  >
+                </div>
+                <div class="cube-face f2">
+                  USD<br /><small style="opacity: 0.9; font-weight: 600"
+                    >1.0000</small
+                  >
+                </div>
+                <div class="cube-face f3">
+                  GBP<br /><small style="opacity: 0.9; font-weight: 600"
+                    >1.2792</small
+                  >
+                </div>
+                <div class="cube-face f4">
+                  JPY<br /><small style="opacity: 0.9; font-weight: 600"
+                    >152.12</small
+                  >
+                </div>
+                <div class="cube-face f5">
+                  AUD<br /><small style="opacity: 0.9; font-weight: 600"
+                    >0.6321</small
+                  >
+                </div>
+                <div class="cube-face f6">
+                  CHF<br /><small style="opacity: 0.9; font-weight: 600"
+                    >0.9112</small
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Controls & actions -->
+        <div class="right-col">
+          <div class="panel">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+              "
+            >
+              <div>
+                <div style="font-weight: 700">Quick Trade</div>
+                <div class="sub">Market orders, instant</div>
+              </div>
+              <div class="sub">Leverage: <strong>10x</strong></div>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-bottom: 10px">
+              <select
+                style="
+                  flex: 1;
+                  padding: 10px;
+                  border-radius: 10px;
+                  border: 1px solid var(--glass-border);
+                  background: transparent;
+                  color: #fff;
+                  outline: none;
+                "
+              >
+                <option value="eurusd">EUR / USD</option>
+                <option value="gbpusd">GBP / USD</option>
+                <option value="usdjpy">USD / JPY</option>
+              </select>
+              <input
+                type="number"
+                placeholder="Lots"
+                style="
+                  width: 120px;
+                  padding: 10px;
+                  border-radius: 10px;
+                  border: 1px solid var(--glass-border);
+                  background: transparent;
+                  color: #fff;
+                  outline: none;
+                "
+              />
+            </div>
+
+            <div class="btn-row">
+              <button class="btn buy" aria-pressed="false">Buy Market</button>
+              <button class="btn sell" aria-pressed="false">Sell Market</button>
+            </div>
+
+            <div class="meta">
+              Orders executed in demo mode — this is a frontend demo only.
+            </div>
+          </div>
+
+          <div class="panel">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 8px;
+              "
+            >
+              <div style="font-weight: 700">Trade Tools</div>
+              <div class="sub">Indicators</div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 12px">
+              <button class="btn ghost">RSI</button>
+              <button class="btn ghost">SMA</button>
+              <button class="btn ghost">EMA</button>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap">
+              <button class="btn">Depth</button>
+              <button class="btn">Book</button>
+              <button class="btn">Chart 3D</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="font-weight: 700; margin-bottom: 8px">Account</div>
+            <div class="sub">Equity: <strong>$124,820.50</strong></div>
+            <div class="sub">Margin used: <strong>$8,240.00</strong></div>
+            <div style="margin-top: 12px">
+              <button class="btn">Deposit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 22px; color: var(--muted); font-size: 13px">
+        Tip: hover the cube to pause rotation. Buttons have a 3D press illusion
+        and cards lift on hover.
+      </div>
+    </div>
+
+    <script>
+      // Small demo-only interactivity: button active states
+      document.querySelectorAll(".btn").forEach((b) => {
+        b.addEventListener("click", () => {
+          b.animate(
+            [
+              { transform: "translateY(0px) translateZ(0px)" },
+              { transform: "translateY(2px) translateZ(-6px)" },
+            ],
+            { duration: 140, fill: "forwards" }
+          );
+          setTimeout(() => {
+            b.style.transform = "";
+          }, 200);
+        });
+      });
+    </script>
+  </body>
+</html>
